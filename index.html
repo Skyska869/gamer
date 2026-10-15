@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Unboxing</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #090d16;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            background: #111827;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border: 1px solid #1f2937;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            background: #1f2937;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+            border: 1px solid #374151;
+        }
+
+        .badge:hover {
+            background: #374151;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .phone-card {
+            position: relative;
+            background: #0f172a;
+            border-radius: 20px;
+            width: 100%;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #334155;
+            transition: 0.3s;
+        }
+
+        .phone-card.common { border-color: #64748b; }
+        .phone-card.rare { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .phone-card.epic { border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+        .phone-card.legendary { border-color: #eab308; box-shadow: 0 0 25px rgba(234, 179, 8, 0.6); background: linear-gradient(135deg, #0f172a 0%, #1e1b0b 100%); }
+
+        .rarity-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+        .common .rarity-badge { background: #64748b; color: white; }
+        .rare .rarity-badge { background: #3b82f6; color: white; }
+        .epic .rarity-badge { background: #a855f7; color: white; }
+        .legendary .rarity-badge { background: #eab308; color: #000; }
+
+        .phone-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin: 10px 0 12px 0;
+            background: #1e293b;
+            padding: 10px;
+        }
+
+        .phone-card h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #f8fafc;
+        }
+
+        .instruction {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .specs {
+            display: flex;
+            justify-content: space-around;
+            font-size: 13px;
+            color: #38bdf8;
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            margin-bottom: 8px;
+        }
+
+        .case-info {
+            font-size: 12px;
+            color: #f43f5e;
+            background: #1e1b1b;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #451a03;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .primary-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #4f46e5;
+        }
+
+        .secondary-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .secondary-btn:hover {
+            background: #059669;
+        }
+
+        .inventory-list {
+            width: 100%;
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 4px;
+        }
+
+        .inventory-item {
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #334155;
+        }
+
+        .inventory-item img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .btn-sell {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            width: auto;
+            margin: 0;
+        }
+
+        .btn-sell:hover {
+            background: #dc2626;
+        }
+
+        .empty-text {
+            color: #64748b;
+            font-size: 14px;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Шапка -->
+    <div class="header">
+        <div id="balanceDisplay" class="badge">💰 $600</div>
+        <div id="openInventoryBtn" class="badge inventory-btn">📱 Склад (<span id="inventoryCount">0</span>)</div>
+    </div>
+
+    <!-- Главный экран (Генератор) -->
+    <div id="mainScreen" class="screen active">
+        <div id="phoneCard" class="phone-card common">
+            <div id="rarityBadge" class="rarity-badge">Ожидание</div>
+            <img id="phoneImage" src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80" alt="Phone">
+            <h2 id="phoneName">Коробка пуста</h2>
+            <p id="phoneInstruction" class="instruction">Стоимость распаковки: $60</p>
+            <div class="specs">
+                <span>📸 <strong id="phoneCamera">0</strong> MP</span>
+                <span>🔋 <strong id="phoneBattery">0</strong> mAh</span>
+            </div>
+            <div id="caseInfo" class="case-info" style="display:none;">🛡 Чехол: <span id="caseName">Нет</span></div>
+        </div>
+        <button id="generateBtn" class="primary-btn">Распаковать гаджет ($60)</button>
+        <button id="saveBtn" class="secondary-btn" style="display:none;">Оставить себе</button>
+    </div>
+
+    <!-- Экран Склада (Инвентаря) -->
+    <div id="inventoryScreen" class="screen">
+        <h2>Твоя Коллекция</h2>
+        <div id="inventoryList" class="inventory-list"></div>
+        <p id="emptyInventoryText" class="empty-text">Склад пуст...</p>
+        <button id="backBtn" class="primary-btn">Назад к распаковке</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let balance = 600;
+        let inventory = [];
+        let currentPhone = null;
+
+        const phonesData = [
+            { name: "iPhone 16 Pro Max (Gold)", img: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=600&q=80", tier: "legendary", baseVal: 400 },
+            { name: "iPhone 15 Pro Titanium", img: "https://images.unsplash.com/photo-1695048065099-e93c83321fb1?auto=format&fit=crop&w=600&q=80", tier: "epic", baseVal: 250 },
+            { name: "Samsung Galaxy S24 Ultra", img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80", tier: "epic", baseVal: 230 },
+            { name: "iPhone 14 Plus", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80", tier: "rare", baseVal: 140 },
+            { name: "Google Pixel 8 Pro", img: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80", tier: "rare", baseVal: 130 },
+            { name: "Xiaomi 14 Ultra", img: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=80", tier: "rare", baseVal: 120 },
+            { name: "Budget Android Phone", img: "https://images.unsplash.com/photo-1533228876829-61c94e7ef50a?auto=format&fit=crop&w=600&q=80", tier: "common", baseVal: 50 }
+        ];
+
+        const casesList = [
+            "Прозрачный силикон", 
+            "MagSafe Кожаный", 
+            "Противоударный Armor", 
+            "Карбоновый ультратонкий", 
+            "RGB Киберпанк", 
+            "Золотой чехол 24K"
+        ];
+
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const inventoryCount = document.getElementById('inventoryCount');
+        const phoneCard = document.getElementById('phoneCard');
+        const rarityBadge = document.getElementById('rarityBadge');
+        const phoneImage = document.getElementById('phoneImage');
+        const phoneName = document.getElementById('phoneName');
+        const phoneInstruction = document.getElementById('phoneInstruction');
+        const phoneCamera = document.getElementById('phoneCamera');
+        const phoneBattery = document.getElementById('phoneBattery');
+        const caseInfo = document.getElementById('caseInfo');
+        const caseName = document.getElementById('caseName');
+        const generateBtn = document.getElementById('generateBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const openInventoryBtn = document.getElementById('openInventoryBtn');
+        const backBtn = document.getElementById('backBtn');
+        const mainScreen = document.getElementById('mainScreen');
+        const inventoryScreen = document.getElementById('inventoryScreen');
+        const inventoryList = document.getElementById('inventoryList');
+        const emptyInventoryText = document.getElementById('emptyInventoryText');
+
+        function updateUI() {
+            balanceDisplay.innerText = XXXINLINECODEXXX1XXXINLINECODEXXX;
+            inventoryCount.innerText = inventory.length;
+        }
+
+        generateBtn.addEventListener('click', () => {
+            if (balance < 60) {
+                alert('Недостаточно средств!');
+                return;
+            }
+            balance -= 60;
+
+            const randomPhone = phonesData[Math.floor(Math.random() * phonesData.length)];
+            const chosenCase = casesList[Math.floor(Math.random() * casesList.length)];
+            
+            const camera = Math.floor(Math.random() * 120) + 48;
+            const battery = Math.floor(Math.random() * 2000) + 3500;
+            const price = Math.round((randomPhone.baseVal + camera * 2 + battery * 0.1) * (randomPhone.tier === 'legendary' ? 1.8 : 1.1));
+
+            currentPhone = { 
+                name: randomPhone.name, 
+                img: randomPhone.img, 
+                tier: randomPhone.tier,
+                camera, 
+                battery, 
+                phoneCase: chosenCase,
+                price 
+            };
+
+            phoneCard.className = XXXINLINECODEXXX2XXXINLINECODEXXX;
+            rarityBadge.innerText = {
+                common: "Обычный",
+                rare: "Редкий",
+                epic: "Эпический",
+                legendary: "Легендарный 🔥"
+            }[randomPhone.tier];
+
+            phoneImage.src = randomPhone.img;
+            phoneName.innerText = randomPhone.name;
+            phoneInstruction.innerText = XXXINLINECODEXXX3XXXINLINECODEXXX;
+            phoneCamera.innerText = camera;
+            phoneBattery.innerText = battery;
+            
+            caseName.innerText = chosenCase;
+            caseInfo.style.display = 'block';
+            saveBtn.style.display = 'block';
+
+            updateUI();
+        });
+
+        saveBtn.addEventListener('click', () => {
+            if (!currentPhone) return;
+            inventory.push(currentPhone);
+            currentPhone = null;
+
+            phoneCard.className = "phone-card common";
+            rarityBadge.innerText = "Ожидание";
+            phoneImage.src = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80";
+            phoneName.innerText = "Гаджет сохранен!";
+            phoneInstruction.innerText = "Крути следующий бокс";
+            phoneCamera.innerText = "0";
+            phoneBattery.innerText = "0";
+            caseInfo.style.display = 'none';
+            saveBtn.style.display = 'none';
+
+            updateUI();
+        });
+
+        openInventoryBtn.addEventListener('click', () => {
+            mainScreen.classList.remove('active');
+            inventoryScreen.classList.add('active');
+            renderInventory();
+        });
+
+        backBtn.addEventListener('click', () => {
+            inventoryScreen.classList.remove('active');
+            mainScreen.classList.add('active');
+        });
+
+        function renderInventory() {
+            inventoryList.innerHTML = '';
+            if (inventory.length === 0) {
+                emptyInventoryText.style.display = 'block';
+                return;
+            }
+            emptyInventoryText.style.display = 'none';
+
+            inventory.forEach((phone, index) => {
+                const item = document.createElement('div');
+                item.className = XXXINLINECODEXXX4XXXINLINECODEXXX;
+                item.innerHTML = `
+                    <img src="${phone.img}">
+                    <div style="flex-grow: 1; margin: 0 10px; text-align: left;">
+                        <div style="font-size: 13px; font-weight: bold; color: ${phone.tier === 'legendary' ? '#eab308' : '#f8fafc'};">${phone.name}</div>
+                        <div style="font-size: 11px; color: #94a3b8;">📸${phone.camera}MP | 🛡 ${phone.phoneCase}</div>
+                    </div>
+                    <button class="btn-sell" data-index="${index}">$${phone.price}</button>
+                `;
+
+                item.querySelector('.btn-sell').addEventListener('click', (e) => {
+                    const idx = e.getAttribute('data-index');
+                    balance += inventory[idx].price;
+                    inventory.splice(idx, 1);
+                    updateUI();
+                    renderInventory();
+                });
+
+                inventoryList.appendChild(item);
+            });
+        }
+
+        updateUI();
+    });
+</script>
+
+</body>
+</html>
